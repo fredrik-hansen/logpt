@@ -2,10 +2,16 @@ import sys
 import requests
 import json
 import os
+from collections import defaultdict
 
-# prelines and postlines represent the number of lines of context to include in the output around the error
 prelines = 10
 postlines = 10
+error_keywords = {
+    "error": "Error",
+    "warning": "Warning",
+    "critical": "Critical",
+    "exception": "Exception"
+}
 
 def find_errors_in_log_file():
     if len(sys.argv) < 2:
@@ -18,15 +24,27 @@ def find_errors_in_log_file():
         return None
 
     try:
-        with open(log_file_path, 'r') as log_file:
-            log_lines = log_file.readlines()
-
         error_logs = []
-        for i, line in enumerate(log_lines):
-            if "error" in line.lower():
-                start_index = max(0, i - prelines)
-                end_index = min(len(log_lines), i + postlines + 1)
-                error_logs.extend(log_lines[start_index:end_index])
+        keyword_set = set(error_keywords.keys())
+        
+        with open(log_file_path, 'r') as log_file:
+            lines = log_file.readlines()
+            line_count = len(lines)
+            error_indices = defaultdict(list)
+
+            for i, line in enumerate(lines):
+                lower_line = line.lower()
+                for keyword in keyword_set:
+                    if keyword in lower_line:
+                        error_indices[keyword].append(i)
+                        break
+
+            for keyword, indices in error_indices.items():
+                log_type = error_keywords[keyword]
+                for index in indices:
+                    start_index = max(0, index - prelines)
+                    end_index = min(line_count, index + postlines + 1)
+                    error_logs.extend([f"{log_type}: {lines[i]}" for i in range(start_index, end_index)])
 
         return error_logs
     except IOError as e:
@@ -44,23 +62,20 @@ def process_error_logs(error_logs):
     }
 
     try:
-        response = requests.post("http://ollama.dc.int:11434/api/generate", json=data, stream=True)
-        response.raise_for_status()
-
-        for line in response.iter_lines():
-            if line:
-                try:
-                    json_data = json.loads(line)
-                    if json_data['done'] == False:
-                        print(json_data['response'], end='')
-                    else:
-                        break
-                except json.JSONDecodeError:
-                    print("Error: Invalid JSON response")
+        with requests.post("http://ollama.dc.int:11434/api/generate", json=data, stream=True) as response:
+            response.raise_for_status()
+            for line in response.iter_lines():
+                if line:
+                    try:
+                        json_data = json.loads(line)
+                        if not json_data['done']:
+                            print(json_data['response'], end='')
+                        else:
+                            break
+                    except json.JSONDecodeError:
+                        print("Error: Invalid JSON response")
     except requests.RequestException as e:
         print(f"Error making API request: {e}")
-    finally:
-        response.close()
 
 if __name__ == "__main__":
     error_logs = find_errors_in_log_file()
