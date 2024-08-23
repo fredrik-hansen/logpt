@@ -45,7 +45,7 @@ The log messages you provided are related to Proxmox Virtual Environment (PVE), 
 
 5. "volume deactivation failed: ceph:vm-54412-disk-0 at /usr/share/perl5/PVE/Storage.pm line 1264": This error indicates that there was an issue deactivating a storage volume (likely related to Ceph) in PVE, which could be due to the previous errors with sysfs write failures.
 
-6. "Error: root@host /etc/pve/firewall #FTG": This is not an error message but rather a prompt indicating that you are logged in as the root user on a machine named pve0.sto.no-ack.net and you are in the /etc/pve/firewall directory. The "#" symbol indicates that you have superuser privileges, and "FTG" is likely a command or part of a command that was intended to be executed but not completed.
+6. "Error: root@host /etc/pve/firewall #FTG": This is not an error message but rather a prompt indicating that you are logged in as the root user on a machine named host and you are in the /etc/pve/firewall directory. The "#" symbol indicates that you have superuser privileges, and "FTG" is likely a command or part of a command that was intended to be executed but not completed.
 
 In summary, these messages indicate issues with VM management and storage related to Ceph in PVE. An experienced user would need more context and information about the system configuration and state to diagnose the root cause of these errors and suggest possible solutions.
 
