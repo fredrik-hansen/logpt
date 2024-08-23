@@ -1,3 +1,15 @@
+"""
+Finds errors in a log file and processes them using an external API.
+
+The `find_errors_in_log_file()` function reads a log file specified as a command-line argument,
+searches for lines containing error-related keywords, and extracts the surrounding context
+(a configurable number of lines before and after the error line). The extracted error logs
+are returned as a list.
+
+The `process_error_logs()` function takes the list of error logs and sends them to an external
+API for further processing. The API response is then printed to the console.
+"""
+
 import sys
 import requests
 import json
@@ -6,12 +18,23 @@ from collections import defaultdict
 
 prelines = 10
 postlines = 10
+
+# API endpoint for the external API
+ollama_api_url = "http://ollama.dc.int:11434/api/generate"
+
+#model to use for analysis
+model = "pki/logpt"
+
+
+# keywords to search for in the log file
 error_keywords = {
     "error": "Error",
     "warning": "Warning",
     "critical": "Critical",
     "exception": "Exception"
 }
+
+
 
 def find_errors_in_log_file():
     if len(sys.argv) < 2:
@@ -58,11 +81,11 @@ def process_error_logs(error_logs):
 
     data = {
         "prompt": "\n".join(error_logs),
-        "model": "pki/logpt"
+        "model": model
     }
 
     try:
-        with requests.post("http://ollama.dc.int:11434/api/generate", json=data, stream=True) as response:
+        with requests.post(ollama_api_url, json=data, stream=True) as response:
             response.raise_for_status()
             for line in response.iter_lines():
                 if line:
