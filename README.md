@@ -9,17 +9,23 @@ are returned as a list.
 The `process_error_logs()` function takes the list of error logs and sends them to an external
 API for further processing. The API response is then printed to the console.
 
-Ollama setup instructions: https://ollama.com/download
+
+
+## Ollama setup 
+
+### Ollama setup instructions: https://ollama.com/download
 
 Download model with:
 ```
 ollama pull pki/logpt
 ```
 
-It's (for now ) low footprint code, only need the below to run:
+It's (for now ) a low footprint code, should only need the below to run.
 ```
 pip install requests json
 ```
+
+
 
 ## Example run #1 and output
 
