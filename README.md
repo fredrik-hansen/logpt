@@ -64,3 +64,29 @@ The log messages you provided are related to Proxmox Virtual Environment (PVE), 
 In summary, these messages indicate issues with VM management and storage related to Ceph in PVE. An experienced user would need more context and information about the system configuration and state to diagnose the root cause of these errors and suggest possible solutions.
 
 
+## Example run 3 and outout
+```
+python3.11 analyzer.py ../logs/log/auth.log
+```
+
+These are SSH login attempts to your server, and they're failing for various reasons. Here's a breakdown of what each error means:
+
+- `Connection closed by authenticating user root 194.50.16.5 port 33740 [preauth]`: A user with the username "root" tried to log in from IP address 194.50.16.5 on port 33740, but their authentication failed (either they entered an incorrect password or used a key that wasn't authorized).
+- `reverse mapping checking getaddrinfo for what.are.you.looking.for [194.50.16.5] failed.`: This is not actually an error, but rather a warning message indicating that the server was unable to perform reverse DNS lookup on the IP address 194.50.16.5. Reverse DNS lookup is when you look up the domain name associated with an IP address.
+- `error: Fssh_kex_exchange_identification: read: Connection reset by peer`: The client (the attacker) closed the connection before completing the SSH handshake, which means they probably didn't like your server's response to their initial connection attempt.
+- `Connection reset by 194.50.16.5 port 51880`: Your server sent a message to the attacker at IP address 194.50.16.5 on port 51880, but they didn't respond. This could be because their connection was dropped or they intentionally ignored your message.
+- `Invalid user guest from 194.50.16.5 port 41186`: Someone tried to log in as the username "guest" from IP address 194.50.16.5 on port 41186, but that user doesn't exist on your server.
+- `Connection closed by invalid user guest 194.50.16.5 port 41186 [preauth]`: The same person who tried to log in as "guest" earlier was trying again, and their connection was closed because they provided an incorrect password or used a key that wasn't authorized.
+- `Connection closed by 188.166.84.138 port 60844`: The client at IP address 188.166.84.138 closed their connection before completing the SSH handshake.
+- `Invalid user public from 188.166.151.68 port 59410`: Someone tried to log in as the username "public" from IP address 188.166.151.68 on port 59410, but that user doesn't exist on your server.
+- `Connection closed by invalid user public 188.166.151.68 port 59410 [preauth]`: The same person who tried to log in as "public" earlier was trying again, and their connection was closed because they provided an incorrect password or used a key that wasn't authorized.
+- `Received disconnect from 79.110.62.145 port 512:11: Bye [preauth]`: The client at IP address 79.110.62.145 sent a "disconnect" message before completing the SSH handshake, likely because they didn't like your server's response to their initial connection attempt.
+
+To protect yourself from these attacks, you can take some steps:
+
+- Use strong passwords and disable password authentication in favor of public key authentication.
+- Limit access to your server by only allowing specific IP addresses or ranges to connect via SSH.
+- Install and configure a tool like `fail2ban` to automatically block IP addresses that make too many failed login attempts.
+- Regularly check your logs for suspicious activity and take action if necessary (e.g., change passwords, revoke keys).
+- Keep your server software up to date with the latest security patches.
+  
