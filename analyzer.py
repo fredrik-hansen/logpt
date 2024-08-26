@@ -16,6 +16,10 @@ import json
 import os
 from collections import defaultdict
 
+
+## # # # # # # # #
+# Config section #
+## # # # # # # # # 
 prelines = 10
 postlines = 10
 
@@ -24,6 +28,9 @@ ollama_api_url = "http://ollama.dc.int:11434/api/generate"
 
 #model to use for analysis
 model = "pki/logpt"
+
+
+
 
 
 # keywords to search for in the log file
