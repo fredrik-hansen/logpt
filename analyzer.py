@@ -1,13 +1,14 @@
 """
 Finds errors in a log file and processes them using an external API.
 
-The `find_errors_in_log_file()` function reads a log file specified as a command-line argument,
-searches for lines containing error-related keywords, and extracts the surrounding context
-(a configurable number of lines before and after the error line). The extracted error logs
-are returned as a list.
+The `find_errors_in_log_file()` function reads a log file specified as a
+command-line argument,searches for lines containing error-related keywords,
+and extracts the surrounding context (a configurable number of lines before
+and after the error line). The extracted error logs are returned as a list.
 
-The `process_error_logs()` function takes the list of error logs and sends them to an external
-API for further processing. The API response is then printed to the console.
+The `process_error_logs()` function takes the list of error logs and sends
+them to an external API for further processing.
+The API response is then printed to the console.
 """
 
 import sys
@@ -17,21 +18,17 @@ import os
 from collections import defaultdict
 
 
-## # # # # # # # #
-# Config section #
-## # # # # # # # # 
+###
+# Config section
+###
 prelines = 10
 postlines = 10
 
 # API endpoint for the external API
 ollama_api_url = "http://ollama.dc.int:11434/api/generate"
 
-#model to use for analysis
+# model to use for analysis
 model = "pki/logpt"
-
-
-
-
 
 # keywords to search for in the log file
 error_keywords = {
@@ -40,7 +37,6 @@ error_keywords = {
     "critical": "Critical",
     "exception": "Exception"
 }
-
 
 
 def find_errors_in_log_file():
@@ -56,7 +52,6 @@ def find_errors_in_log_file():
     try:
         error_logs = []
         keyword_set = set(error_keywords.keys())
-        
         with open(log_file_path, 'r') as log_file:
             lines = log_file.readlines()
             line_count = len(lines)
@@ -79,11 +74,15 @@ def find_errors_in_log_file():
         return error_logs
     except IOError as e:
         print(f"Error reading file: {e}")
-        return None
+        return -1
+
 
 def process_error_logs(error_logs):
     if not error_logs:
         print("No errors found or unable to process log file.")
+        return
+    if error_logs == -1:
+        print("Could not read file, check permissions")
         return
 
     data = {
@@ -106,6 +105,7 @@ def process_error_logs(error_logs):
                         print("Error: Invalid JSON response")
     except requests.RequestException as e:
         print(f"Error making API request: {e}")
+
 
 if __name__ == "__main__":
     error_logs = find_errors_in_log_file()
