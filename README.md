@@ -21,7 +21,7 @@ ollama pull pki/logpt
 ```
 or use curl (this is what I usually do since I am running Ollama in my local kubernetes cluster:
 ```
-curl http://localhost:11434/api/pull -d '{
+curl http://ollama.dc.int:11434/api/pull -d '{
   "name": "pki/logpt"
 }'
 ```
